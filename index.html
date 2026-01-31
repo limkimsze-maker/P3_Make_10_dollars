@@ -31,17 +31,12 @@
       toDelete.forEach(key=>{ try{ localStorage.removeItem(key); }catch(e){} });
 
       try{
-          $("#score-input").value = "1";
-          $("#feedback-input").value = "Well done!";
-          if(typeof updateStore === "function"){
-            try{ updateStore(); }catch(e){}
-          }else if(typeof storeState === "function"){
-            try{ storeState({score:1, feedback:"Well done!"}); }catch(e){}
-          }
-        }catch(e){}
-
-        try{ setTimeout(()=>{ if(window.__SQ_openNextAction) window.__SQ_openNextAction(); }, 180); }catch(e){}
-      }else{
+        const msg = {type:"clear", activityId: ACTIVITY_ID, ts: Date.now()};
+        const bc = new BroadcastChannel("xapi-state");
+        bc.postMessage(msg);
+        bc.close();
+      }catch(e){}
+    }catch(e){}
     window.__ACTIVITY_ID__ = ACTIVITY_ID;
   })();
   </script>
@@ -733,52 +728,78 @@
     
 
     .pill#bgmBtn.off{opacity:.75}
-/* ====== Post-win popup (next action) ====== */
-#nextActionOverlay{
-  position:fixed;
-  inset:0;
-  background:rgba(2,6,23,.45);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
-  padding:16px;
-}
-#nextActionOverlay.show{ display:flex; }
 
-.nextActionModal{
-  width:min(560px, 100%);
-  background:#fff;
-  border:1px solid rgba(15,23,42,.14);
-  border-radius:18px;
-  box-shadow:0 18px 50px rgba(2,6,23,.25);
-  padding:14px;
-}
-.nextActionTitle{
-  font-weight:1000;
-  font-size:16px;
-  margin:0 0 6px 0;
-}
-.nextActionMsg{
-  font-weight:900;
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.35;
-  margin:0 0 12px 0;
-}
-.nextActionBtns{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  justify-content:flex-end;
-}
-
+    /* ====== ✅ Post-win popup modal ====== */
+    .sqModalOverlay{
+      position:absolute;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background:rgba(2,6,23,.55);
+      backdrop-filter: blur(4px);
+      z-index:50;
+    }
+    .sqModal{
+      width:min(520px, 100%);
+      border-radius:20px;
+      background:#fff;
+      border:1px solid rgba(15,23,42,.16);
+      box-shadow:0 20px 60px rgba(2,6,23,.28);
+      overflow:hidden;
+    }
+    .sqModalHead{
+      padding:14px 16px;
+      background:linear-gradient(90deg, rgba(14,165,233,.14), rgba(139,92,246,.12));
+      border-bottom:1px solid rgba(15,23,42,.10);
+      font-weight:1000;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .sqModalBody{ padding:14px 16px; }
+    .sqModalQ{
+      font-weight:1000;
+      font-size:14px;
+      line-height:1.35;
+      color:rgba(15,23,42,.92);
+    }
+    .sqModalBtns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+      justify-content:flex-end;
+    }
+    .sqModalBtns .btn{ border-radius:14px; }
 </style>
 </head>
 
 <body>
   <div class="app" id="app">
     <canvas id="confetti"></canvas>
+
+    <!-- ✅ Post-win popup (inside .app so it overlays neatly) -->
+    <div class="sqModalOverlay" id="sqNextOverlay" role="dialog" aria-modal="true" aria-labelledby="sqNextTitle">
+      <div class="sqModal">
+        <div class="sqModalHead">
+          <div id="sqNextTitle">Next Step</div>
+          <button class="btn ghost" id="sqNextCancelX" type="button" aria-label="Close">✕</button>
+        </div>
+        <div class="sqModalBody">
+          <div class="sqModalQ">
+            Do you want to buy other things or you want to practise buying more things or the same value?
+          </div>
+          <div class="sqModalBtns">
+            <button class="btn" id="sqNextOther" type="button">Choose other things</button>
+            <button class="btn secondary" id="sqNextSame" type="button">Practise same value</button>
+            <button class="btn ghost" id="sqNextCancel" type="button">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div class="topbar">
       <div>
@@ -1437,6 +1458,9 @@ if(wallet.children.length===0){
             try{ storeState({score:1, feedback:"Well done!"}); }catch(e){}
           }
         }catch(e){}
+
+        // ✅ Post-win popup
+        try{ setTimeout(()=>{ if(typeof openSQNextPrompt==="function") openSQNextPrompt(); }, 250); }catch(e){}
       }else{
         status3.textContent = "❌ Not yet. Check your coins, dollars, and total.";
         status3.className = "status bad";
@@ -1618,6 +1642,52 @@ if(wallet.children.length===0){
     $("#testWrongBtn").addEventListener("click", ()=>play(sndWrong));
     $("#testClockBtn").addEventListener("click", ()=>play(sndClock));
 
+    // ====== ✅ Post-win popup wiring ======
+    (function(){
+      const overlay = document.getElementById("sqNextOverlay");
+      const btnOther = document.getElementById("sqNextOther");
+      const btnSame  = document.getElementById("sqNextSame");
+      const btnCancel = document.getElementById("sqNextCancel");
+      const btnCancelX = document.getElementById("sqNextCancelX");
+      if(!overlay) return;
+
+      function open(){
+        overlay.style.display = "flex";
+        // focus first action for keyboard users
+        try{ (btnOther||btnSame||btnCancel).focus(); }catch(e){}
+      }
+      function close(){
+        overlay.style.display = "none";
+      }
+
+      // Expose function for checkFinal to call
+      window.openSQNextPrompt = open;
+
+      if(btnOther){
+        btnOther.addEventListener("click", ()=>{
+          try{ window.location.href = "https://limkimsze-maker.github.io/P3_Saving_Quest_Making_Money_Up_To_100/"; }catch(e){}
+        });
+      }
+      if(btnSame){
+        btnSame.addEventListener("click", ()=>{
+          try{ window.location.reload(); }catch(e){}
+        });
+      }
+      function cancel(){ close(); }
+      if(btnCancel) btnCancel.addEventListener("click", cancel);
+      if(btnCancelX) btnCancelX.addEventListener("click", cancel);
+
+      // Click outside card closes (optional but nice)
+      overlay.addEventListener("click", (e)=>{
+        if(e.target === overlay) close();
+      });
+
+      // Esc closes
+      window.addEventListener("keydown", (e)=>{
+        if(e.key === "Escape" && overlay.style.display !== "none") close();
+      });
+    })();
+
     // ====== Game HUD (Speed Streak) — shared across all Savings Quest levels ======
     (function(){
       const LIMIT_MS = 75000;
@@ -1759,66 +1829,8 @@ if(wallet.children.length===0){
 
       applyPlayState(false);
     })();
-// ====== Post-win popup (next action) ======
-(function(){
-  const overlay = document.getElementById("nextActionOverlay");
-  const btnOther = document.getElementById("nextOtherBtn");
-  const btnSame  = document.getElementById("nextSameBtn");
-  const btnCancel= document.getElementById("nextCancelBtn");
-
-  if(!overlay || !btnOther || !btnSame || !btnCancel) return;
-
-  function close(){
-    overlay.classList.remove("show");
-  }
-  function open(){
-    overlay.classList.add("show");
-  }
-
-  // Expose a safe global for the win hook
-  window.__SQ_openNextAction = function(){
-    open();
-  };
-
-  btnOther.addEventListener("click", ()=>{
-    window.location.href = "https://limkimsze-maker.github.io/P3_Saving_Quest_Making_Money_Up_To_100/";
-  });
-
-  btnSame.addEventListener("click", ()=>{
-    window.location.reload();
-  });
-
-  btnCancel.addEventListener("click", close);
-
-  // Click outside modal closes
-  overlay.addEventListener("click", (e)=>{
-    if(e.target === overlay) close();
-  });
-
-  // ESC closes
-  window.addEventListener("keydown", (e)=>{
-    if(!overlay.classList.contains("show")) return;
-    if(e.key === "Escape") close();
-  });
-})();
 
     newQuestion();
   </script>
-  <!-- ====== Post-win popup (next action) ====== -->
-<div id="nextActionOverlay" role="dialog" aria-modal="true" aria-labelledby="nextActionTitle">
-  <div class="nextActionModal">
-    <div class="nextActionTitle" id="nextActionTitle">Next step</div>
-    <p class="nextActionMsg">
-      Do you want to buy other things or you want to practise buying more things or the same value?
-    </p>
-
-    <div class="nextActionBtns">
-      <button class="btn" id="nextOtherBtn" type="button">Choose other things</button>
-      <button class="btn secondary" id="nextSameBtn" type="button">Practise same value</button>
-      <button class="btn ghost" id="nextCancelBtn" type="button">Cancel</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
