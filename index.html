@@ -774,6 +774,9 @@
       justify-content:flex-end;
     }
     .sqModalBtns .btn{ border-radius:14px; }
+    /* Hide Sound Kit panel */
+#soundKitCard{ display:none !important; }
+
 </style>
 </head>
 
@@ -806,18 +809,7 @@
         <h1>Make $10 — Make a Dollar First</h1>
         <div class="subtitle">Coins on the left • Dollars on the right • Then type your answers</div>
       </div>
-      <div class="pillrow">
-        
-        
-        <div class="pill" id="bgmBtn" role="button" tabindex="0" title="Background music" style="cursor:pointer">🎵 Music: On</div>
-<div class="pill" title="Time Challenge"><span class="dot warn" id="dotT"></span>⏱ <span id="timerText">00:00</span></div>
-        <div class="pill" title="Speed Streak"><span class="dot warn" id="dotS"></span>🔥 <span id="streakText">0</span></div>
-        <div class="pill" title="Target time"><span class="dot warn" id="dotL"></span>Target: 01:15</div>
-<div class="pill"><span class="dot warn" id="dot1"></span>Coins</div>
-        <div class="pill"><span class="dot warn" id="dot2"></span>Dollars</div>
-        <div class="pill"><span class="dot warn" id="dot3"></span>Answer</div>
-      </div>
-    </div>
+     </div>
 
     <div class="content">
       <!-- LEFT -->
@@ -848,7 +840,7 @@
         </div>
 
         <div class="moneyRow">
-          <div class="chip"><span id="haveAmt">—</span> saved</div>
+          <div class="chip">I have<span id="haveAmt">—</span></div>
           <div class="wallet" id="wallet"></div>
         </div>
 
@@ -993,11 +985,12 @@
           <div class="note" style="margin-top:10px;">Tip: Tap a dollar on the mat to remove it.</div>
         </div>
 
-        <div class="card">
+                <div class="card" id="soundKitCard">
           <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
             <div style="font-weight:1000;">Sound Kit</div>
             <div class="note">Unlock if blocked</div>
           </div>
+
 
           <div class="soundbar">
             <label class="toggle"><input type="checkbox" id="soundOn" checked>Sounds on</label>
