@@ -1111,10 +1111,11 @@
       el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake");
     }
     function setDots(){
-      dot1.className = "dot " + (step1OK ? "good" : "warn");
-      dot2.className = "dot " + (step2OK ? "good" : "warn");
-      dot3.className = "dot " + (finished ? "good" : "warn");
-    }
+  if(dot1) dot1.className = "dot " + (step1OK ? "good" : "warn");
+  if(dot2) dot2.className = "dot " + (step2OK ? "good" : "warn");
+  if(dot3) dot3.className = "dot " + (finished ? "good" : "warn");
+}
+
 
     function fmtHave(){
       const cents = String(haveC).padStart(2,"0");
