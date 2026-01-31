@@ -31,12 +31,17 @@
       toDelete.forEach(key=>{ try{ localStorage.removeItem(key); }catch(e){} });
 
       try{
-        const msg = {type:"clear", activityId: ACTIVITY_ID, ts: Date.now()};
-        const bc = new BroadcastChannel("xapi-state");
-        bc.postMessage(msg);
-        bc.close();
-      }catch(e){}
-    }catch(e){}
+          $("#score-input").value = "1";
+          $("#feedback-input").value = "Well done!";
+          if(typeof updateStore === "function"){
+            try{ updateStore(); }catch(e){}
+          }else if(typeof storeState === "function"){
+            try{ storeState({score:1, feedback:"Well done!"}); }catch(e){}
+          }
+        }catch(e){}
+
+        try{ setTimeout(()=>{ if(window.__SQ_openNextAction) window.__SQ_openNextAction(); }, 180); }catch(e){}
+      }else{
     window.__ACTIVITY_ID__ = ACTIVITY_ID;
   })();
   </script>
@@ -728,6 +733,45 @@
     
 
     .pill#bgmBtn.off{opacity:.75}
+/* ====== Post-win popup (next action) ====== */
+#nextActionOverlay{
+  position:fixed;
+  inset:0;
+  background:rgba(2,6,23,.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+  padding:16px;
+}
+#nextActionOverlay.show{ display:flex; }
+
+.nextActionModal{
+  width:min(560px, 100%);
+  background:#fff;
+  border:1px solid rgba(15,23,42,.14);
+  border-radius:18px;
+  box-shadow:0 18px 50px rgba(2,6,23,.25);
+  padding:14px;
+}
+.nextActionTitle{
+  font-weight:1000;
+  font-size:16px;
+  margin:0 0 6px 0;
+}
+.nextActionMsg{
+  font-weight:900;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.35;
+  margin:0 0 12px 0;
+}
+.nextActionBtns{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
 
 </style>
 </head>
@@ -1715,8 +1759,66 @@ if(wallet.children.length===0){
 
       applyPlayState(false);
     })();
+// ====== Post-win popup (next action) ======
+(function(){
+  const overlay = document.getElementById("nextActionOverlay");
+  const btnOther = document.getElementById("nextOtherBtn");
+  const btnSame  = document.getElementById("nextSameBtn");
+  const btnCancel= document.getElementById("nextCancelBtn");
+
+  if(!overlay || !btnOther || !btnSame || !btnCancel) return;
+
+  function close(){
+    overlay.classList.remove("show");
+  }
+  function open(){
+    overlay.classList.add("show");
+  }
+
+  // Expose a safe global for the win hook
+  window.__SQ_openNextAction = function(){
+    open();
+  };
+
+  btnOther.addEventListener("click", ()=>{
+    window.location.href = "https://limkimsze-maker.github.io/P3_Saving_Quest_Making_Money_Up_To_100/";
+  });
+
+  btnSame.addEventListener("click", ()=>{
+    window.location.reload();
+  });
+
+  btnCancel.addEventListener("click", close);
+
+  // Click outside modal closes
+  overlay.addEventListener("click", (e)=>{
+    if(e.target === overlay) close();
+  });
+
+  // ESC closes
+  window.addEventListener("keydown", (e)=>{
+    if(!overlay.classList.contains("show")) return;
+    if(e.key === "Escape") close();
+  });
+})();
 
     newQuestion();
   </script>
+  <!-- ====== Post-win popup (next action) ====== -->
+<div id="nextActionOverlay" role="dialog" aria-modal="true" aria-labelledby="nextActionTitle">
+  <div class="nextActionModal">
+    <div class="nextActionTitle" id="nextActionTitle">Next step</div>
+    <p class="nextActionMsg">
+      Do you want to buy other things or you want to practise buying more things or the same value?
+    </p>
+
+    <div class="nextActionBtns">
+      <button class="btn" id="nextOtherBtn" type="button">Choose other things</button>
+      <button class="btn secondary" id="nextSameBtn" type="button">Practise same value</button>
+      <button class="btn ghost" id="nextCancelBtn" type="button">Cancel</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
