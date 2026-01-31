@@ -1,0 +1,1722 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- /standard (Kim Sze) -->
+  <link rel="icon" href="./kimsze_sharp16.ico?v=20260111a" sizes="any">
+  <link rel="shortcut icon" href="./kimsze_sharp16.ico?v=20260111a">
+
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <title>Money — Make a Dollar First, Then Make $10</title>
+
+  <!-- ✅ Always-Clear on Load (Default Build Contract) -->
+  <script>
+  (function(){
+    const ACTIVITY_ID = "https://limkimsze-maker.github.io/Make10_MakeADollarFirst/";
+    try{
+      const toDelete = [];
+      for(let i=0;i<localStorage.length;i++){
+        const k = localStorage.key(i);
+        if(!k) continue;
+        if(k === ACTIVITY_ID) toDelete.push(k);
+        if(k.startsWith(ACTIVITY_ID+"::")) toDelete.push(k);
+        if(k.startsWith("sls_scope::"+ACTIVITY_ID)) toDelete.push(k);
+        if(k.startsWith("UFCO-firstSubmit::"+ACTIVITY_ID)) toDelete.push(k);
+        if(k.startsWith("sls_unlike_payload::"+ACTIVITY_ID)) toDelete.push(k);
+        if(k.startsWith("sls_unlike_payload::"+ACTIVITY_ID+"::")) toDelete.push(k);
+        if(k.startsWith("sls_unlike_payload::"+ACTIVITY_ID+"*")) toDelete.push(k);
+        if(k.startsWith("UFCO-")) toDelete.push(k);
+      }
+      toDelete.push("UFCO-session","UFCO-resume","UFCO-last");
+      toDelete.forEach(key=>{ try{ localStorage.removeItem(key); }catch(e){} });
+
+      try{
+        const msg = {type:"clear", activityId: ACTIVITY_ID, ts: Date.now()};
+        const bc = new BroadcastChannel("xapi-state");
+        bc.postMessage(msg);
+        bc.close();
+      }catch(e){}
+    }catch(e){}
+    window.__ACTIVITY_ID__ = ACTIVITY_ID;
+  })();
+  </script>
+
+  <!-- Counter.dev (optional) -->
+  <!-- <script src="https://cdn.counter.dev/script.js" data-id="YOUR_DATA_ID" data-utcoffset="8"></script> -->
+
+  <style>
+    :root{
+      --bg1:#f7fbff;
+      --bg2:#fff7ed;
+      --card:#ffffff;
+      --ink:#0f172a;
+      --muted:#64748b;
+      --line:#e2e8f0;
+
+      --accent:#0ea5e9;
+      --accent2:#8b5cf6;
+
+      --good:#16a34a;
+      --bad:#e11d48;
+      --warn:#f59e0b;
+
+      --mat1:#dcfce7;
+      --mat2:#bbf7d0;
+
+      --shadow:0 16px 40px rgba(2,6,23,.12);
+      --radius:22px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
+      /* ✅ Original cute lion watermark (copyright-safe, generic) */
+      --lionMark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%230f172a' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M60 18c-20 0-36 16-36 36 0 22 14 40 36 40s36-18 36-40c0-20-16-36-36-36z'/%3E%3Cpath d='M38 48c-10-2-16-10-16-20 10 2 18 8 22 16'/%3E%3Cpath d='M82 48c10-2 16-10 16-20-10 2-18 8-22 16'/%3E%3Cpath d='M48 62c4 4 8 6 12 6s8-2 12-6'/%3E%3Cpath d='M56 74c2 2 4 3 4 3s2-1 4-3'/%3E%3Ccircle cx='46' cy='56' r='2'/%3E%3Ccircle cx='74' cy='56' r='2'/%3E%3C/g%3E%3C/svg%3E");
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--ink);
+      background:
+        radial-gradient(900px 520px at 15% 12%, rgba(14,165,233,.14), transparent 55%),
+        radial-gradient(900px 520px at 85% 18%, rgba(139,92,246,.14), transparent 55%),
+        radial-gradient(900px 520px at 50% 95%, rgba(245,158,11,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+    }
+    .app{
+      width:min(1140px, 100%);
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .topbar{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 16px;
+      background:linear-gradient(90deg, rgba(14,165,233,.12), rgba(139,92,246,.10));
+      border-bottom:1px solid var(--line);
+    }
+    h1{margin:0; font-size:18px; letter-spacing:.2px;}
+    .subtitle{font-size:13px; color:var(--muted); font-weight:800}
+    .pillrow{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+    .pill{
+      cursor:default;
+
+      font-size:12px;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(15,23,42,.14);
+      background:#fff;
+      color:var(--ink);
+      display:flex;
+      gap:8px;
+      align-items:center;
+      user-select:none;
+      font-weight:1000;
+    }
+    .dot{width:9px;height:9px;border-radius:50%; background:var(--muted);}
+    .dot.good{background:var(--good)}
+    .dot.warn{background:var(--warn)}
+
+    .content{
+      display:grid;
+      grid-template-columns: 1.14fr .86fr;
+      gap:14px;
+      padding:14px;
+    }
+    @media (max-width: 920px){
+      .content{grid-template-columns:1fr}
+      .pillrow{justify-content:flex-start}
+    }
+
+    .card{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      background:#fff;
+    }
+    .q{
+      font-size:18px;
+      line-height:1.25;
+      font-weight:1000;
+    }
+    .q small{font-weight:800; color:var(--muted); font-size:13px}
+    .note{font-size:12px; color:var(--muted); font-weight:900}
+
+    .moneyRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+      padding:10px;
+      border:1px dashed rgba(15,23,42,.22);
+      border-radius:16px;
+      background:linear-gradient(180deg, rgba(14,165,233,.06), rgba(139,92,246,.04));
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border:1px solid rgba(15,23,42,.16);
+      border-radius:999px;
+      background:#fff;
+      font-weight:1000;
+    }
+
+    /* wallet */
+    .wallet{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+    .noteMock{
+      width:108px; height:58px;
+      border-radius:14px;
+      border:2px solid rgba(15,23,42,.16);
+      background:
+        radial-gradient(circle at 18% 30%, rgba(255,255,255,.9), rgba(255,255,255,0) 45%),
+        linear-gradient(135deg, rgba(14,165,233,.25), rgba(139,92,246,.18));
+      box-shadow:0 10px 18px rgba(2,6,23,.10);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:1000;
+      letter-spacing:.3px;
+      position:relative;
+      overflow:hidden;
+    }
+    .noteMock:before{
+      content:"";
+      position:absolute;
+      inset:8px;
+      border-radius:10px;
+      border:2px dashed rgba(15,23,42,.16);
+      pointer-events:none;
+      opacity:.95;
+    }
+    .noteMock small{
+      display:block;
+      font-size:10px;
+      font-weight:1000;
+      opacity:.8;
+      letter-spacing:1px;
+      text-transform:uppercase;
+      text-align:center;
+      margin-top:2px;
+    }
+    .coinMini{
+      width:52px;height:52px;border-radius:50%;
+      display:grid; place-items:center;
+      border:2px solid rgba(15,23,42,.14);
+      font-weight:1000;
+      background:
+        radial-gradient(circle at 30% 25%, rgba(255,255,255,.9), rgba(255,255,255,0) 45%),
+        radial-gradient(circle at 70% 75%, rgba(0,0,0,.12), rgba(0,0,0,0) 55%),
+        linear-gradient(180deg, rgba(255,255,255,.6), rgba(255,255,255,.25));
+      box-shadow:0 10px 18px rgba(2,6,23,.10);
+      position:relative;
+      overflow:hidden;
+    }
+    .coinMini:after{
+      content:"";
+      position:absolute;
+      inset:6px;
+      border-radius:50%;
+      border:2px dotted rgba(15,23,42,.16);
+      pointer-events:none;
+    }
+
+    /* merged mat */
+    .matBig{
+      margin-top:12px;
+      background:linear-gradient(180deg, var(--mat1), var(--mat2));
+      border:2px solid rgba(22,163,74,.28);
+      border-radius:20px;
+      padding:12px;
+      min-height:340px;
+    }
+    .matTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .matTitleBig{font-weight:1000; font-size:15px;}
+    .badge{
+      background:rgba(22,163,74,.20);
+      border:2px solid rgba(22,163,74,.22);
+      padding:8px 14px;
+      border-radius:999px;
+      font-weight:1000;
+      letter-spacing:.2px;
+    }
+    .matMid{
+      margin-top:8px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 780px){
+      .matMid{grid-template-columns:1fr}
+    }
+    .midBox{
+      padding:8px 10px;
+      border-radius:14px;
+      border:1px dashed rgba(15,23,42,.16);
+      background:rgba(255,255,255,.55);
+    }
+    .matZones{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    @media (max-width: 780px){
+      .matZones{grid-template-columns:1fr}
+    }
+    .zone{
+      border-radius:18px;
+      border:2px solid rgba(15,23,42,.10);
+      background:rgba(255,255,255,.55);
+      padding:10px;
+      min-height:210px;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-end;
+      gap:10px;
+    }
+    .zoneLeft{border-color:rgba(22,163,74,.22)}
+    .zoneRight{border-color:rgba(14,165,233,.22)}
+
+    .stack{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-content:flex-start;
+      min-height:115px;
+      padding:6px 2px;
+    }
+    .zoneFooter{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      padding-top:6px;
+      border-top:1px dashed rgba(15,23,42,.14);
+    }
+    .addLabel{font-weight:1000; font-size:18px;}
+    .op{color:var(--muted); font-weight:1000;}
+    .madeTxt{font-weight:900; color:rgba(15,23,42,.75);}
+    .zoneBtns{
+      display:flex;
+      gap:8px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+
+    /* ✅ Coins on the mat should match the bank coin design */
+    .token{
+      position:relative;
+      display:inline-block;
+      cursor:pointer;
+      user-select:none;
+      transition:transform .08s ease;
+    }
+    .token:active{transform:scale(.98)}
+    .token .coin{ width:68px;height:68px; }
+
+    .token .x{
+      position:absolute;
+      right:-6px; top:-6px;
+      width:20px;height:20px;border-radius:50%;
+      background:var(--bad);
+      color:#fff;
+      font-size:12px;
+      display:grid; place-items:center;
+      border:2px solid #fff;
+      box-shadow:0 8px 14px rgba(2,6,23,.16);
+      z-index:3;
+    }
+
+    .tokenNote{
+  width:140px; height:74px;
+  border-radius:18px;
+  border:2px solid rgba(15,23,42,.16);
+  background:
+    radial-gradient(circle at 18% 30%, rgba(255,255,255,.9), rgba(255,255,255,0) 45%),
+    linear-gradient(135deg, rgba(34,197,94,.18), rgba(14,165,233,.14));
+  box-shadow:0 10px 18px rgba(2,6,23,.10);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:1000;
+  position:relative;
+  overflow:hidden;
+  user-select:none;
+  cursor:pointer;
+}
+.tokenNote:before{
+  content:"";
+  position:absolute;
+  inset:10px;
+  border-radius:14px;
+  border:2px dotted rgba(15,23,42,.16);
+  pointer-events:none;
+}
+    .tokenNote small{font-size:10px; opacity:.75; letter-spacing:1px; text-transform:uppercase}
+    .tokenNote .x{
+      position:absolute;
+      right:-6px; top:-6px;
+      width:20px;height:20px;border-radius:50%;
+      background:var(--bad);
+      color:#fff;
+      font-size:12px;
+      display:grid; place-items:center;
+      border:2px solid #fff;
+      box-shadow:0 8px 14px rgba(2,6,23,.16);
+      z-index:3;
+    }
+
+    /* ✅ $1 coin (octagon, gold) for bank + mat token */
+    .coinOct{
+      width:74px; height:74px;
+      display:grid; place-items:center;
+      font-weight:1000;
+      border:2px solid rgba(15,23,42,.16);
+      filter: drop-shadow(0 10px 16px rgba(2,6,23,.14));
+      clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+      background:
+        radial-gradient(circle at 30% 25%, rgba(255,255,255,.95), rgba(255,255,255,0) 42%),
+        radial-gradient(circle at 70% 75%, rgba(0,0,0,.18), rgba(0,0,0,0) 55%),
+        linear-gradient(180deg, #fff7c2 0%, #fbbf24 55%, #b45309 100%);
+      position:relative;
+      user-select:none;
+      overflow:hidden;
+    }
+    .coinOct:before{
+      content:"";
+      position:absolute;
+      inset:8px;
+      clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+      border:2px dashed rgba(15,23,42,.16);
+      opacity:.9;
+      pointer-events:none;
+    }
+    .coinOct small{
+      display:block;
+      font-size:10px;
+      font-weight:1000;
+      letter-spacing:.7px;
+      opacity:.8;
+      margin-top:2px;
+      text-transform:uppercase;
+    }
+    .tokenNote.tokenCoin1{
+      width:74px; height:74px;
+      border-radius:0;
+      clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+      background:
+        radial-gradient(circle at 30% 25%, rgba(255,255,255,.95), rgba(255,255,255,0) 42%),
+        radial-gradient(circle at 70% 75%, rgba(0,0,0,.18), rgba(0,0,0,0) 55%),
+        linear-gradient(180deg, #fff7c2 0%, #fbbf24 55%, #b45309 100%);
+      display:grid;
+      place-items:center;
+      padding:0;
+      overflow:hidden;
+    }
+    .tokenNote.tokenCoin1 small{display:none;}
+
+    .btn{
+      border:none;
+      cursor:pointer;
+      padding:10px 12px;
+      border-radius:14px;
+      font-weight:1000;
+      background:linear-gradient(180deg, rgba(14,165,233,.95), rgba(14,165,233,.78));
+      color:#fff;
+      box-shadow:0 10px 18px rgba(14,165,233,.22);
+    }
+    .btn.secondary{
+      background:linear-gradient(180deg, rgba(15,23,42,.92), rgba(15,23,42,.78));
+      box-shadow:0 10px 18px rgba(2,6,23,.16);
+    }
+    .btn.ghost{
+      background:#fff;
+      color:var(--ink);
+      border:1px solid rgba(15,23,42,.16);
+      box-shadow:none;
+    }
+    .btn:disabled{opacity:.55; cursor:not-allowed}
+
+    .status{
+      font-weight:1000;
+      color:var(--muted);
+      font-size:13px;
+      margin-top:4px;
+    }
+    .status.good{color:var(--good)}
+    .status.bad{color:var(--bad)}
+    .revealRed{ color:#ef4444; font-weight:1000; }
+
+    /* answers */
+    .answerBox{
+      margin-top:12px;
+      padding:12px;
+      border-radius:18px;
+      border:1px solid rgba(15,23,42,.14);
+      background:rgba(2,6,23,.02);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .eqRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .inbox{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:14px;
+      border:2px solid rgba(22,163,74,.26);
+      background:rgba(22,163,74,.10);
+      font-weight:1000;
+    }
+    .inbox.blue{
+      border-color: rgba(14,165,233,.26);
+      background: rgba(14,165,233,.08);
+    }
+    .inbox input{
+      font-size:16px;
+      font-weight:1000;
+      border:none;
+      outline:none;
+      background:transparent;
+      text-align:center;
+    }
+    .inbox input:disabled{opacity:.55}
+    .w86{width:86px}
+    .w140{width:140px}
+
+    .sumRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      padding:10px;
+      border-radius:16px;
+      border:1px dashed rgba(15,23,42,.18);
+      background:linear-gradient(180deg, rgba(22,163,74,.06), rgba(14,165,233,.04));
+      font-weight:1000;
+    }
+
+    /* right banks */
+    .side{display:flex; flex-direction:column; gap:14px;}
+    .bankRow{display:flex; gap:10px; flex-wrap:wrap;}
+    .coinBtn,.noteBtn{border:none; background:transparent; padding:0; cursor:pointer; user-select:none;}
+
+    /* Bank coin design */
+    .coin{
+      width:68px;height:68px;border-radius:50%;
+      display:grid; place-items:center;
+      position:relative;
+      filter: drop-shadow(0 8px 14px rgba(2,6,23,.14));
+    }
+    .coin:before{
+      content:"";
+      position:absolute; inset:0;
+      border-radius:50%;
+      background:
+        radial-gradient(circle at 30% 25%, rgba(255,255,255,.85), rgba(255,255,255,0) 40%),
+        radial-gradient(circle at 70% 75%, rgba(0,0,0,.14), rgba(0,0,0,0) 50%);
+      mix-blend-mode:overlay;
+      pointer-events:none;
+    }
+    .coin .ring{
+      position:absolute; inset:6px;
+      border-radius:50%;
+      border:2px dashed rgba(15,23,42,.18);
+      pointer-events:none;
+    }
+    .coin .inner{
+      width:52px;height:52px;border-radius:50%;
+      display:grid; place-items:center;
+      border:2px solid rgba(15,23,42,.16);
+      background:rgba(255,255,255,.35);
+      backdrop-filter: blur(3px);
+      font-weight:1000;
+      letter-spacing:.2px;
+    }
+    .coin .inner span{font-size:16px}
+    .coin .inner small{
+      display:block;
+      font-size:10px;
+      font-weight:1000;
+      letter-spacing:.7px;
+      opacity:.85;
+      margin-top:1px;
+      text-transform:uppercase;
+    }
+/* Wallet coins (I have) — match bank coin design, just smaller */
+.coin.walletCoin{
+  width:52px;
+  height:52px;
+  filter: drop-shadow(0 6px 10px rgba(2,6,23,.12));
+}
+.coin.walletCoin .ring{ inset:4px; border-width:2px; }
+.coin.walletCoin .inner{ width:40px; height:40px; }
+.coin.walletCoin .inner span{ font-size:13px; }
+.coin.walletCoin .inner small{ font-size:8px; letter-spacing:.6px; }
+
+/* Neutral coin for showing 0 cents (still same design language) */
+.c0{
+  background: radial-gradient(circle at 30% 25%, #fff, #e5e7eb 40%, #94a3b8 100%);
+}
+
+    .c5{ background: radial-gradient(circle at 30% 25%, #fff, #c7f9cc 40%, #4ade80 100%); }
+    .c10{ background: radial-gradient(circle at 30% 25%, #fff, #bae6fd 40%, #38bdf8 100%); }
+    .c20{ background: radial-gradient(circle at 30% 25%, #fff, #fecaca 40%, #fb7185 100%); }
+    .c50{ background: radial-gradient(circle at 30% 25%, #fff, #fde68a 40%, #f59e0b 100%); }
+
+    /* Bank note design */
+    .noteCard{
+      width:140px; height:74px;
+      border-radius:18px;
+      border:2px solid rgba(15,23,42,.16);
+      background:
+        radial-gradient(circle at 18% 30%, rgba(255,255,255,.9), rgba(255,255,255,0) 45%),
+        linear-gradient(135deg, rgba(34,197,94,.18), rgba(14,165,233,.14));
+      box-shadow:0 10px 18px rgba(2,6,23,.10);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:1000;
+      position:relative;
+      overflow:hidden;
+      user-select:none;
+    }
+    .noteCard:before{
+      content:"";
+      position:absolute;
+      inset:10px;
+      border-radius:14px;
+      border:2px dotted rgba(15,23,42,.16);
+      pointer-events:none;
+    }
+    .noteCard small{
+      display:block;
+      font-size:10px;
+      opacity:.78;
+      letter-spacing:1px;
+      text-transform:uppercase;
+      text-align:center;
+      margin-top:2px;
+    }
+
+    /* ✅ Cute lion watermark for mock notes (exclude $1 coin tokens) */
+    .noteMock, .noteCard, .tokenNote:not(.tokenCoin1){ isolation:isolate; }
+    .noteMock:after,
+    .noteCard:after,
+    .tokenNote:not(.tokenCoin1):after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background-image: var(--lionMark);
+      background-repeat:no-repeat;
+      background-position: 10px 10px;
+      background-size: 54px 54px;
+      opacity:.16;
+      pointer-events:none;
+      z-index:1;
+    }
+    .noteMock > *,
+    .noteCard > *,
+    .tokenNote:not(.tokenCoin1) > *{
+      position:relative;
+      z-index:2;
+    }
+
+    .shake{animation:shake .35s ease;}
+    @keyframes shake{
+      0%{transform:translateX(0)}
+      20%{transform:translateX(-6px)}
+      40%{transform:translateX(6px)}
+      60%{transform:translateX(-4px)}
+      80%{transform:translateX(4px)}
+      100%{transform:translateX(0)}
+    }
+
+    /* sound */
+    .soundbar{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:10px;}
+    .toggle{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(15,23,42,.16);
+      background:#fff;
+      font-weight:1000;
+      cursor:pointer;
+      user-select:none;
+    }
+    .toggle input{accent-color:var(--accent)}
+    .smallbtn{
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid rgba(15,23,42,.16);
+      background:#fff;
+      cursor:pointer;
+      font-weight:1000;
+    }
+
+    /* confetti */
+    #confetti{position:absolute; inset:0; pointer-events:none; display:none;}
+    #xapiBase{display:none;}
+
+    .credit{
+      padding:10px 14px;
+      border-top:1px solid var(--line);
+      font-size:12px;
+      color:var(--muted);
+      font-weight:900;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      background:linear-gradient(180deg, #fff, rgba(2,6,23,.015));
+    }
+  
+    /* ====== Game add-on (HUD + shop item art) ====== */
+    .itemHero{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      padding:12px;
+      border-radius:18px;
+      border:1px solid rgba(15,23,42,.14);
+      background:linear-gradient(180deg, rgba(14,165,233,.06), rgba(139,92,246,.05));
+      margin-bottom:10px;
+      position:relative;
+      overflow:hidden;
+    }
+    .itemHero:before{
+      content:"";
+      position:absolute;
+      inset:-40px -40px auto auto;
+      width:220px;height:220px;
+      border-radius:50%;
+      background:radial-gradient(circle at 30% 30%, rgba(245,158,11,.22), transparent 60%);
+      pointer-events:none;
+    }
+    .itemSvg{flex:0 0 auto}
+    .itemText{min-width:0}
+    .itemTitle{font-weight:1000; font-size:16px; line-height:1.15;}
+    .itemSub{font-weight:900; font-size:12px; color:var(--muted); margin-top:2px;}
+    
+
+    .pill#bgmBtn.off{opacity:.75}
+
+</style>
+</head>
+
+<body>
+  <div class="app" id="app">
+    <canvas id="confetti"></canvas>
+
+    <div class="topbar">
+      <div>
+        <h1>Make $10 — Make a Dollar First</h1>
+        <div class="subtitle">Coins on the left • Dollars on the right • Then type your answers</div>
+      </div>
+      <div class="pillrow">
+        
+        
+        <div class="pill" id="bgmBtn" role="button" tabindex="0" title="Background music" style="cursor:pointer">🎵 Music: On</div>
+<div class="pill" title="Time Challenge"><span class="dot warn" id="dotT"></span>⏱ <span id="timerText">00:00</span></div>
+        <div class="pill" title="Speed Streak"><span class="dot warn" id="dotS"></span>🔥 <span id="streakText">0</span></div>
+        <div class="pill" title="Target time"><span class="dot warn" id="dotL"></span>Target: 01:15</div>
+<div class="pill"><span class="dot warn" id="dot1"></span>Coins</div>
+        <div class="pill"><span class="dot warn" id="dot2"></span>Dollars</div>
+        <div class="pill"><span class="dot warn" id="dot3"></span>Answer</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- LEFT -->
+      <div class="card">
+
+        <div class="itemHero">
+          <svg class="itemSvg" width="84" height="64" viewBox="0 0 84 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <g fill="none" stroke="rgba(15,23,42,.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="10" y="18" width="64" height="32" rx="10" fill="rgba(139,92,246,.14)"/>
+    <path d="M18 22h48" />
+    <path d="M22 22v-6c0-4 3-7 7-7h26c4 0 7 3 7 7v6" />
+    <path d="M18 34h48" stroke-dasharray="4 3" opacity=".8"/>
+    <path d="M66 29v10" />
+    <circle cx="66" cy="41" r="2" fill="rgba(245,158,11,.35)"/>
+  </g>
+  <g font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-weight="900" font-size="12" fill="rgba(15,23,42,.92)">
+    <text x="6" y="14">$10</text>
+  </g>
+</svg>
+          <div class="itemText">
+            <div class="itemTitle">Pencil case</div>
+            <div class="itemSub">Goal item: $10 pencil case</div>
+          </div>
+        </div>
+        <div class="q">
+          How much more money do <span style="color:var(--accent);">I</span> need to buy a pencil case that costs <span style="color:var(--good);">$10</span>?
+          <br><small>Make a dollar first, then count on to make $10.</small>
+        </div>
+
+        <div class="moneyRow">
+          <div class="chip"><span id="haveAmt">—</span> saved</div>
+          <div class="wallet" id="wallet"></div>
+        </div>
+
+        <!-- MERGED MAT -->
+        <div class="matBig" id="matBig">
+          <div class="matTop">
+            <div class="matTitleBig">Big Money Mat</div>
+            <div class="badge" id="badgeTotal">?</div>
+          </div>
+
+          <div class="matMid">
+            <div class="midBox">
+              <div class="note">Step 1: Make a dollar first</div>
+              <div class="status" id="status1">Put the correct coins (left side).</div>
+            </div>
+            <div class="midBox">
+              <div class="note">Step 2: Count on to make $10</div>
+              <div class="status" id="status2">Finish Step 1 first.</div>
+            </div>
+          </div>
+
+          <div class="matZones">
+            <!-- LEFT: COINS -->
+            <div class="zone zoneLeft" id="zoneLeft">
+              <div class="stack" id="coinStack"></div>
+
+              <div class="zoneFooter">
+                <div class="addLabel"><span class="op">+</span> <span id="needCentsText"></span><span class="op">¢</span></div>
+                <div class="madeTxt" id="madeDollarTxt" style="display:none;">Amount: <b><span id="afterDollarAmt">—</span></b></div>
+              </div>
+
+              <div class="zoneBtns">
+                <button class="btn ghost" id="clear1" type="button">Clear</button>
+                <button class="btn" id="check1" type="button">Check</button>
+              </div>
+            </div>
+
+            <!-- RIGHT: DOLLARS -->
+            <div class="zone zoneRight" id="zoneRight">
+              <div class="stack" id="noteStack"></div>
+
+              <div class="zoneFooter">
+                <div class="addLabel"><span class="op">+</span> <span class="op">$</span><span id="needDollarsText"></span><span class="op">.00</span></div>
+                <div class="madeTxt" id="madeTenTxt" style="display:none;">Amount: <b><span id="afterTenAmt">—</span></b></div>
+              </div>
+
+              <div class="zoneBtns">
+                <button class="btn ghost" id="clear2" type="button" disabled>Clear</button>
+                <button class="btn" id="check2" type="button" disabled>Check</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ANSWERS -->
+        <div class="answerBox" id="answerBox">
+          <div class="note">After both sides are correct, type the amounts below.</div>
+
+          <div class="eqRow">
+            <span class="chip">Coins added:</span>
+            <span class="inbox">
+              <input id="ansCents" class="w86" inputmode="numeric" pattern="[0-9]*" placeholder="" disabled>
+              <span>¢</span>
+            </span>
+          </div>
+
+          <div class="eqRow">
+            <span class="chip">Dollars added:</span>
+            <span class="inbox blue">
+              <span>$</span>
+              <input id="ansDollars" class="w140" inputmode="decimal" placeholder="" disabled>
+            </span>
+          </div>
+
+          <div class="sumRow">
+            <span class="op">Total more needed:</span>
+            <span class="inbox">
+              <span>$</span>
+              <input id="ansTotal" class="w140" inputmode="decimal" placeholder="" disabled>
+            </span>
+
+            <div style="margin-left:auto; display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn secondary" id="checkAns" type="button" disabled>Check answer</button>
+              <button class="btn ghost" id="newQ" type="button">New question</button>
+            </div>
+          </div>
+
+          <div class="status" id="status3">Finish coins and dollars first.</div>
+        </div>
+
+        <!-- Hidden xAPI base -->
+        <div id="xapiBase">
+          <input id="score-input" type="text" value="0">
+          <input id="feedback-input" type="text" value="">
+          <script src="./xapiwrapper.min.js"></script>
+          <script src="./index.js"></script>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="side">
+        <div class="card">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+            <div style="font-weight:1000;">Coins (for left side)</div>
+            <div class="note">Tap to add</div>
+          </div>
+          <div class="bankRow" style="margin-top:10px;">
+            <button class="coinBtn" data-v="5" aria-label="Add 5 cents">
+              <div class="coin c5"><div class="ring"></div><div class="inner"><div><span>5</span><small>cents</small></div></div></div>
+            </button>
+            <button class="coinBtn" data-v="10" aria-label="Add 10 cents">
+              <div class="coin c10"><div class="ring"></div><div class="inner"><div><span>10</span><small>cents</small></div></div></div>
+            </button>
+            <button class="coinBtn" data-v="20" aria-label="Add 20 cents">
+              <div class="coin c20"><div class="ring"></div><div class="inner"><div><span>20</span><small>cents</small></div></div></div>
+            </button>
+            <button class="coinBtn" data-v="50" aria-label="Add 50 cents">
+              <div class="coin c50"><div class="ring"></div><div class="inner"><div><span>50</span><small>cents</small></div></div></div>
+            </button>
+          </div>
+          <div class="note" style="margin-top:10px;">Tip: Tap a coin on the mat to remove it.</div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+            <div style="font-weight:1000;">Dollars (for right side)</div>
+            <div class="note">Tap to add</div>
+          </div>
+          <div class="bankRow" style="margin-top:10px;">
+            <!-- ✅ $1 is a GOLD OCTAGON COIN -->
+            <button class="noteBtn" data-v="1" aria-label="Add 1 dollar coin">
+              <div class="coinOct"><div style="text-align:center">$1<small>coin</small></div></div>
+            </button>
+
+            <button class="noteBtn" data-v="2" aria-label="Add 2 dollars">
+              <div class="noteCard"><div><div style="text-align:center">$2</div><small>note</small></div></div>
+            </button>
+            <button class="noteBtn" data-v="5" aria-label="Add 5 dollars">
+              <div class="noteCard"><div><div style="text-align:center">$5</div><small>note</small></div></div>
+            </button>
+          </div>
+          <div class="note" style="margin-top:10px;">Tip: Tap a dollar on the mat to remove it.</div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+            <div style="font-weight:1000;">Sound Kit</div>
+            <div class="note">Unlock if blocked</div>
+          </div>
+
+          <div class="soundbar">
+            <label class="toggle"><input type="checkbox" id="soundOn" checked>Sounds on</label>
+            <button class="smallbtn" id="unlockAudioBtn" type="button">🔓 Unlock audio</button>
+            <button class="smallbtn" id="testCorrectBtn" type="button">Test ✅</button>
+            <button class="smallbtn" id="testWrongBtn" type="button">Test ❌</button>
+            <button class="smallbtn" id="testClockBtn" type="button">Test ⏱️</button>
+          </div>
+
+          <div class="note" style="margin-top:10px;">
+            If no sound on mobile: press <b>Unlock audio</b> once, then test again.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="credit">
+      <div>Designed by Lim Kim Sze © 2026</div>
+      <div class="note">Coins → Dollars → Type answers → Check</div>
+    </div>
+  </div>
+  <audio id="bgmAudio" loop preload="auto" src="./puzzle-game-bright-casual-video-game-music-249202.mp3"></audio>
+
+
+  <audio id="sndCorrect" preload="auto" src="./correct.mp3?v=20260130c"></audio>
+  <audio id="sndWrong" preload="auto" src="./wrong.mp3?v=20260130c"></audio>
+  <audio id="sndClock" preload="auto" src="./clock.mp3?v=20260130c"></audio>
+
+  <script>
+    const $ = (s, el=document)=>el.querySelector(s);
+    const $$ = (s, el=document)=>Array.from(el.querySelectorAll(s));
+
+    const app = $("#app");
+    const confettiCanvas = $("#confetti");
+    const cctx = confettiCanvas.getContext("2d");
+
+    const wallet = $("#wallet");
+    const haveAmt = $("#haveAmt");
+
+    const zoneLeft = $("#zoneLeft");
+    const zoneRight = $("#zoneRight");
+
+    const coinStack = $("#coinStack");
+    const noteStack = $("#noteStack");
+
+    const badgeTotal = $("#badgeTotal");
+
+    const needCentsText = $("#needCentsText");
+    const needDollarsText = $("#needDollarsText");
+
+    const status1 = $("#status1");
+    const status2 = $("#status2");
+    const status3 = $("#status3");
+
+    const clear1 = $("#clear1");
+    const clear2 = $("#clear2");
+    const check1 = $("#check1");
+    const check2 = $("#check2");
+    const newQ = $("#newQ");
+
+    const ansCents = $("#ansCents");
+    const ansDollars = $("#ansDollars");
+    const ansTotal = $("#ansTotal");
+    const checkAns = $("#checkAns");
+
+    const madeDollarTxt = $("#madeDollarTxt");
+    const madeTenTxt = $("#madeTenTxt");
+    const afterDollarAmt = $("#afterDollarAmt");
+    const afterTenAmt = $("#afterTenAmt");
+
+    const dot1 = $("#dot1"), dot2=$("#dot2"), dot3=$("#dot3");
+
+    const soundOn = $("#soundOn");
+    const sndCorrect = $("#sndCorrect");
+    const sndWrong = $("#sndWrong");
+    const sndClock = $("#sndClock");
+
+    let haveD = 0, haveC = 0;
+    let needCents = 0;
+    let needDollars = 0;
+    let step1OK = false;
+    let step2OK = false;
+    let finished = false;
+
+    // confetti
+    let confettiAnim = null;
+    let pieces = [];
+
+    function clampDigits(v){
+      v = (v||"").toString().replace(/[^\d]/g,"");
+      if(v==="") return "";
+      v = v.replace(/^0+(?=\d)/, "");
+      return v;
+    }
+
+    function clampMoneyLoose(v){
+      v = (v||"").toString().replace(/[^\d.$]/g,"");
+      const has$ = v.includes("$");
+      v = v.replace(/\$/g,"");
+      if(has$) v = "$" + v;
+
+      const parts = v.split(".");
+      if(parts.length > 2){
+        v = parts[0] + "." + parts.slice(1).join("");
+      }
+      const p = v.split(".");
+      if(p.length===2){
+        v = p[0] + "." + p[1].slice(0,2);
+      }
+      return v;
+    }
+
+    async function play(aud){
+      if(!soundOn.checked) return;
+      try{ aud.currentTime=0; await aud.play(); }catch(e){}
+    }
+    function shake(el){
+      el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake");
+    }
+    function setDots(){
+      dot1.className = "dot " + (step1OK ? "good" : "warn");
+      dot2.className = "dot " + (step2OK ? "good" : "warn");
+      dot3.className = "dot " + (finished ? "good" : "warn");
+    }
+
+    function fmtHave(){
+      const cents = String(haveC).padStart(2,"0");
+      return `$${haveD}.${cents}`;
+    }
+
+    /* ✅ Wallet: show real denominations (no "55¢ coin") + $1 as coin */
+    function buildWallet(){
+      wallet.innerHTML = "";
+
+      const pushNote = (label, bg)=>{
+        const d = document.createElement("div");
+        d.className="noteMock";
+        if(bg) d.style.background = bg;
+        d.innerHTML = `<div style="text-align:center">${label}<small>note</small></div>`;
+        wallet.appendChild(d);
+      };
+
+      // $5 and $2 notes, remaining $1 as coin
+      const note5 = Math.floor(haveD/5);
+      let rem = haveD % 5;
+      const note2 = Math.floor(rem/2);
+      rem = rem % 2; // $1 coin
+
+      for(let i=0;i<Math.min(note5,2);i++) pushNote("$5");
+      for(let i=0;i<Math.min(note2,2);i++)
+        pushNote("$2", `radial-gradient(circle at 18% 30%, rgba(255,255,255,.9), rgba(255,255,255,0) 45%), linear-gradient(135deg, rgba(34,197,94,.18), rgba(14,165,233,.14))`);
+
+      if(rem===1){
+        const c1 = document.createElement("div");
+        c1.className="coinOct";
+        c1.style.transform="scale(.72)";
+        c1.style.transformOrigin="center";
+        c1.innerHTML = `<div style="text-align:center">$1<small>coin</small></div>`;
+        wallet.appendChild(c1);
+      }
+
+      // Cents into 50/20/10/5
+      // Cents into 50/20/10/5 (use SAME coin design as the bank)
+let cents = haveC;
+const denoms = [50,20,10,5];
+for(const d of denoms){
+  const n = Math.floor(cents/d);
+  const cls = (d===5) ? "c5" : (d===10) ? "c10" : (d===20) ? "c20" : "c50";
+  for(let i=0;i<n;i++){
+    const c = document.createElement("div");
+    c.className = `coin ${cls} walletCoin`;
+    c.innerHTML = `
+      <div class="ring"></div>
+      <div class="inner"><div><span>${d}</span><small>cents</small></div></div>
+    `;
+    wallet.appendChild(c);
+  }
+  cents = cents % d;
+}
+
+// If I have $0.00, show a neutral "0 cents" coin (same design language)
+if(wallet.children.length===0){
+  const c = document.createElement("div");
+  c.className = "coin c0 walletCoin";
+  c.innerHTML = `
+    <div class="ring"></div>
+    <div class="inner"><div><span>0</span><small>cents</small></div></div>
+  `;
+  wallet.appendChild(c);
+}
+
+    }
+
+    function sumCoins(){
+      let t=0;
+      $$(".token", coinStack).forEach(x=> t += Number(x.dataset.v||0));
+      return t;
+    }
+    function sumNotes(){
+      let t=0;
+      $$(".tokenNote", noteStack).forEach(x=> t += Number(x.dataset.v||0));
+      return t;
+    }
+
+    function addCoin(v){
+      if(finished || step1OK) return;
+      if(needCents===0) return;
+
+      const tok = document.createElement("div");
+      tok.className = "token";
+      tok.dataset.v = String(v);
+
+      const cls = (v===5) ? "c5" : (v===10) ? "c10" : (v===20) ? "c20" : "c50";
+      tok.innerHTML = `
+        <div class="coin ${cls}">
+          <div class="ring"></div>
+          <div class="inner">
+            <div><span>${v}</span><small>cents</small></div>
+          </div>
+        </div>
+        <span class="x">×</span>
+      `;
+
+      tok.title = "Tap to remove";
+      tok.addEventListener("click", ()=>{
+        if(step1OK || finished) return;
+        tok.remove();
+      });
+      coinStack.appendChild(tok);
+    }
+
+    function addNote(v){
+      if(finished || !step1OK || step2OK) return;
+      if(needDollars===0) return;
+
+      const tok = document.createElement("div");
+      tok.className = (v===1) ? "tokenNote tokenCoin1" : "tokenNote";
+      tok.dataset.v = String(v);
+
+      tok.innerHTML = (v===1)
+        ? `<div style="text-align:center">$1</div><span class="x">×</span>`
+        : `<div style="text-align:center">$${v}</div><small>note</small><span class="x">×</span>`;
+
+      tok.title = "Tap to remove";
+      tok.addEventListener("click", ()=>{
+        if(step2OK || finished) return;
+        tok.remove();
+      });
+      noteStack.appendChild(tok);
+    }
+
+    function clearCoins(){
+      if(finished || step1OK) return;
+      coinStack.innerHTML = "";
+    }
+    function clearNotes(){
+      if(finished || !step1OK || step2OK) return;
+      noteStack.innerHTML = "";
+    }
+
+    function lockCoins(){
+      $$(".token", coinStack).forEach(tok=>{
+        tok.style.cursor="default";
+        const x = tok.querySelector(".x");
+        if(x) x.style.display="none";
+      });
+    }
+    function lockNotes(){
+      $$(".tokenNote", noteStack).forEach(tok=>{
+        tok.style.cursor="default";
+        const x = tok.querySelector(".x");
+        if(x) x.style.display="none";
+      });
+    }
+
+    function enableNotes(){
+      clear2.disabled = false;
+      check2.disabled = false;
+      status2.textContent = "Put the correct dollars (right side).";
+      status2.className = "status";
+    }
+
+    function enableAnswers(){
+      ansCents.disabled = false;
+      ansDollars.disabled = false;
+      ansTotal.disabled = false;
+      checkAns.disabled = false;
+
+      status3.textContent = "Type your answers, then press Check answer.";
+      status3.className = "status";
+    }
+
+    function revealNeedCents(val){
+      needCentsText.textContent = String(val);
+      needCentsText.classList.add("revealRed");
+    }
+    function revealNeedDollars(val){
+      needDollarsText.textContent = String(val);
+      needDollarsText.classList.add("revealRed");
+    }
+
+    function checkStep1(){
+      if(finished) return;
+
+      if(needCents===0){
+        step1OK = true;
+        status1.textContent = "✅ Whole dollar already ($1.00). Do the dollars (right side).";
+        status1.className = "status good";
+
+        revealNeedCents(0);
+
+        const interimD = haveD;
+        afterDollarAmt.textContent = `$${interimD}.00`;
+        madeDollarTxt.style.display = "inline";
+
+        lockCoins();
+        enableNotes();
+        play(sndCorrect);
+        setDots();
+        return;
+      }
+
+      const t = sumCoins();
+      if(t === needCents){
+        step1OK = true;
+        status1.textContent = "✅ Correct! Now do the dollars (right side).";
+        status1.className = "status good";
+
+        revealNeedCents(needCents);
+
+        const interimD = haveD + 1;
+        afterDollarAmt.textContent = `$${interimD}.00`;
+        madeDollarTxt.style.display = "inline";
+
+        lockCoins();
+        enableNotes();
+        play(sndCorrect);
+      }else{
+        status1.textContent = "❌ Not yet. Try again.";
+        status1.className = "status bad";
+        shake(zoneLeft);
+        play(sndWrong);
+      }
+      setDots();
+    }
+
+    function checkStep2(){
+      if(finished || !step1OK) return;
+
+      if(needDollars===0){
+        step2OK = true;
+        status2.textContent = "✅ You are already at $10.";
+        status2.className = "status good";
+
+        revealNeedDollars(0);
+
+        afterTenAmt.textContent = "$10.00";
+        madeTenTxt.style.display = "inline";
+
+        lockNotes();
+        enableAnswers();
+        play(sndCorrect);
+        setDots();
+        return;
+      }
+
+      const t = sumNotes();
+      if(t === needDollars){
+        step2OK = true;
+        status2.textContent = "✅ Correct! Now type your answers below.";
+        status2.className = "status good";
+
+        revealNeedDollars(needDollars);
+
+        afterTenAmt.textContent = "$10.00";
+        madeTenTxt.style.display = "inline";
+
+        lockNotes();
+        enableAnswers();
+        play(sndCorrect);
+      }else{
+        status2.textContent = "❌ Not yet. Try again.";
+        status2.className = "status bad";
+        shake(zoneRight);
+        play(sndWrong);
+      }
+      setDots();
+    }
+
+    function parseNotesInput(raw){
+      raw = (raw||"").trim().replace(/\s+/g,"");
+      if(raw==="") return NaN;
+
+      const mInt = raw.match(/^\$?(\d+)$/);
+      if(mInt) return Number(mInt[1]);
+
+      const m2dp = raw.match(/^\$?(\d+)\.(\d{2})$/);
+      if(m2dp){
+        if(m2dp[2] === "00") return Number(m2dp[1]);
+        return NaN;
+      }
+      return NaN;
+    }
+
+    function parseTotalInput(raw){
+      raw = (raw||"").trim().replace(/\s+/g,"");
+      if(raw==="") return NaN;
+
+      const mInt  = raw.match(/^\$?(\d+)$/);
+      if(mInt) return Number(mInt[1]);
+
+      const m2dp  = raw.match(/^\$?(\d+)\.(\d{2})$/);
+      if(m2dp) return Number(m2dp[1]) + Number(m2dp[2])/100;
+
+      return NaN;
+    }
+
+    function checkFinal(){
+      if(finished || !step1OK || !step2OK) return;
+
+      ansCents.value = clampDigits(ansCents.value);
+      ansDollars.value = clampMoneyLoose(ansDollars.value);
+      ansTotal.value = clampMoneyLoose(ansTotal.value);
+
+      const c = ansCents.value==="" ? NaN : Number(ansCents.value);
+      const d = parseNotesInput(ansDollars.value);
+      const userTotal = parseTotalInput(ansTotal.value);
+
+      const expC = needCents;
+      const expD = needDollars;
+      const expTotal = expD + expC/100;
+
+      const okC = (Number.isFinite(c) && c===expC);
+      const okD = (Number.isFinite(d) && d===expD);
+      const okT = (Number.isFinite(userTotal) && Math.abs(userTotal - expTotal) < 0.001);
+
+      if(okC && okD && okT){
+        finished = true;
+        status3.textContent = "🎉 Well done!";
+        status3.className = "status good";
+        setDots();
+        play(sndCorrect);
+        showConfetti();
+
+        badgeTotal.textContent = `$${expTotal.toFixed(2)}`;
+
+        ansCents.disabled = true;
+        ansDollars.disabled = true;
+        ansTotal.disabled = true;
+        checkAns.disabled = true;
+
+        try{
+          $("#score-input").value = "1";
+          $("#feedback-input").value = "Well done!";
+          if(typeof updateStore === "function"){
+            try{ updateStore(); }catch(e){}
+          }else if(typeof storeState === "function"){
+            try{ storeState({score:1, feedback:"Well done!"}); }catch(e){}
+          }
+        }catch(e){}
+      }else{
+        status3.textContent = "❌ Not yet. Check your coins, dollars, and total.";
+        status3.className = "status bad";
+        shake($("#answerBox"));
+        play(sndWrong);
+      }
+    }
+
+    // Confetti
+    function resizeConfetti(){
+      const r = app.getBoundingClientRect();
+      confettiCanvas.width = Math.max(1, Math.floor(r.width));
+      confettiCanvas.height = Math.max(1, Math.floor(r.height));
+    }
+    window.addEventListener("resize", resizeConfetti, {passive:true});
+
+    function hideConfetti(){
+      if(confettiAnim) cancelAnimationFrame(confettiAnim);
+      confettiAnim = null;
+      cctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+      confettiCanvas.style.display = "none";
+    }
+
+    function showConfetti(){
+      resizeConfetti();
+      confettiCanvas.style.display = "block";
+
+      if(confettiAnim) cancelAnimationFrame(confettiAnim);
+      confettiAnim = null;
+      cctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+
+      pieces = [];
+      const W = confettiCanvas.width, H = confettiCanvas.height;
+      const count = Math.min(180, Math.floor(W*H/6500));
+      for(let i=0;i<count;i++){
+        pieces.push({
+          x: Math.random()*W,
+          y: -20 - Math.random()*H*0.4,
+          w: 6 + Math.random()*8,
+          h: 8 + Math.random()*12,
+          r: Math.random()*Math.PI,
+          vr: (-0.2 + Math.random()*0.4),
+          vx: -1.2 + Math.random()*2.4,
+          vy: 2.6 + Math.random()*4.4,
+          a: 0.9 + Math.random()*0.1
+        });
+      }
+      const t0 = performance.now();
+      function step(t){
+        const dt = Math.min(32, t - (step._last||t));
+        step._last = t;
+
+        cctx.clearRect(0,0,W,H);
+        for(const p of pieces){
+          p.x += p.vx*(dt/16);
+          p.y += p.vy*(dt/16);
+          p.r += p.vr*(dt/16);
+          p.vx *= 0.999;
+          p.vy *= 0.999;
+
+          cctx.save();
+          cctx.globalAlpha = p.a;
+          cctx.translate(p.x, p.y);
+          cctx.rotate(p.r);
+          const hue = (p.x + p.y) % 360;
+          cctx.fillStyle = `hsl(${hue} 85% 55%)`;
+          cctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+          cctx.restore();
+        }
+        if(t - t0 < 3500) confettiAnim = requestAnimationFrame(step);
+        else hideConfetti();
+      }
+      confettiAnim = requestAnimationFrame(step);
+    }
+
+    function newQuestion(){
+      hideConfetti();
+      finished = false;
+      step1OK = false;
+      step2OK = false;
+
+      haveD = Math.floor(Math.random()*10);
+      haveC = Math.floor(Math.random()*20)*5;
+      if(haveD===0 && haveC===0) haveC = 5;
+
+      needCents = (100 - (haveC % 100)) % 100;
+      const interimD = haveD + (needCents>0 ? 1 : 0);
+      needDollars = Math.max(0, 10 - interimD);
+
+      haveAmt.textContent = fmtHave();
+      buildWallet();
+
+      needCentsText.textContent = "";
+      needDollarsText.textContent = "";
+      needCentsText.classList.remove("revealRed");
+      needDollarsText.classList.remove("revealRed");
+
+      badgeTotal.textContent = "?";
+
+      coinStack.innerHTML = "";
+      noteStack.innerHTML = "";
+
+      madeDollarTxt.style.display = "none";
+      madeTenTxt.style.display = "none";
+      afterDollarAmt.textContent = "—";
+      afterTenAmt.textContent = "—";
+
+      clear2.disabled = true;
+      check2.disabled = true;
+
+      status1.textContent = (needCents===0)
+        ? "Whole dollar already ($1.00). Press Check, then do the dollars."
+        : "Put the correct coins (left side).";
+      status1.className = "status";
+
+      status2.textContent = "Finish Step 1 first.";
+      status2.className = "status";
+
+      status3.textContent = "Finish coins and dollars first.";
+      status3.className = "status";
+
+      ansCents.value = "";
+      ansDollars.value = "";
+      ansTotal.value = "";
+      ansCents.disabled = true;
+      ansDollars.disabled = true;
+      ansTotal.disabled = true;
+      checkAns.disabled = true;
+
+      try{ $("#score-input").value="0"; $("#feedback-input").value=""; }catch(e){}
+
+      setDots();
+    }
+
+    $$(".coinBtn").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const v = Number(btn.dataset.v||0);
+        addCoin(v);
+      });
+    });
+    $$(".noteBtn").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const v = Number(btn.dataset.v||0);
+        addNote(v);
+      });
+    });
+
+    clear1.addEventListener("click", clearCoins);
+    clear2.addEventListener("click", clearNotes);
+    check1.addEventListener("click", checkStep1);
+    check2.addEventListener("click", checkStep2);
+    checkAns.addEventListener("click", checkFinal);
+    newQ.addEventListener("click", newQuestion);
+
+    ansCents.addEventListener("input", ()=> ansCents.value = clampDigits(ansCents.value));
+    ansDollars.addEventListener("input", ()=> ansDollars.value = clampMoneyLoose(ansDollars.value));
+    ansTotal.addEventListener("input", ()=> ansTotal.value = clampMoneyLoose(ansTotal.value));
+
+    [ansCents, ansDollars, ansTotal].forEach(inp=>{
+      inp.addEventListener("keydown", (e)=>{
+        if(e.key==="Enter"){
+          e.preventDefault();
+          if(!step1OK) checkStep1();
+          else if(!step2OK) checkStep2();
+          else checkFinal();
+        }
+      });
+    });
+
+    $("#unlockAudioBtn").addEventListener("click", async ()=>{
+      try{
+        await sndCorrect.play();
+        sndCorrect.pause();
+        sndCorrect.currentTime = 0;
+        await play(sndCorrect);
+      }catch(e){}
+    });
+    $("#testCorrectBtn").addEventListener("click", ()=>play(sndCorrect));
+    $("#testWrongBtn").addEventListener("click", ()=>play(sndWrong));
+    $("#testClockBtn").addEventListener("click", ()=>play(sndClock));
+
+    // ====== Game HUD (Speed Streak) — shared across all Savings Quest levels ======
+    (function(){
+      const LIMIT_MS = 75000;
+      const STREAK_KEY = "KS-speedstreak::SavingsQuest";
+
+      const timerText = document.getElementById("timerText");
+      const streakText = document.getElementById("streakText");
+      const dotT = document.getElementById("dotT");
+      const dotS = document.getElementById("dotS");
+
+      let streak = Number(localStorage.getItem(STREAK_KEY) || "0");
+
+      let t0 = 0;
+      let ticking = false;
+      let raf = 0;
+
+      function fmt(ms){
+        ms = Math.max(0, ms|0);
+        const s = Math.floor(ms/1000);
+        const mm = String(Math.floor(s/60)).padStart(2,"0");
+        const ss = String(s%60).padStart(2,"0");
+        return mm + ":" + ss;
+      }
+
+      function paint(){
+        if(!timerText) return;
+        if(!ticking) return;
+        timerText.textContent = fmt(Date.now()-t0);
+        raf = requestAnimationFrame(paint);
+      }
+
+      function startRun(){
+        t0 = Date.now();
+        ticking = true;
+        if(dotT) dotT.className = "dot warn";
+        if(dotS) dotS.className = "dot warn";
+        if(raf) cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(paint);
+        if(streakText) streakText.textContent = String(streak);
+      }
+
+      function stopRun(){ ticking = false; if(raf) cancelAnimationFrame(raf); raf=0; }
+
+      function onWin(){
+        stopRun();
+        const dt = Date.now() - t0;
+        const fast = dt <= LIMIT_MS;
+
+        if(fast) streak += 1;
+        else streak = 0;
+
+        try{ localStorage.setItem(STREAK_KEY, String(streak)); }catch(e){}
+
+        if(streakText) streakText.textContent = String(streak);
+        if(dotT) dotT.className = "dot " + (fast ? "good" : "warn");
+        if(dotS) dotS.className = "dot " + (fast ? "good" : "warn");
+      }
+
+      // Wrap newQuestion so the timer restarts on replay
+      try{
+        const _nq = newQuestion;
+        newQuestion = function(){ _nq(); startRun(); };
+      }catch(e){}
+
+      // Hook whichever win-check function exists on this page
+      try{
+        if(typeof checkAnswer === "function"){
+          const _ca = checkAnswer;
+          checkAnswer = function(){ const was = finished; _ca(); if(!was && finished) onWin(); };
+        }
+      }catch(e){}
+
+      try{
+        if(typeof checkFinal === "function"){
+          const _cf = checkFinal;
+          checkFinal = function(){ const was = finished; _cf(); if(!was && finished) onWin(); };
+        }
+      }catch(e){}
+
+      // Start immediately
+      try{ startRun(); }catch(e){}
+    })();
+
+
+    // ====== Background Music (shared across levels) ======
+    (function(){
+      const BGM_KEY = "SQ-bgm-on";
+      const btn = document.getElementById("bgmBtn");
+      const bgm = document.getElementById("bgmAudio");
+      if(!btn || !bgm) return;
+
+      // Default ON (will start after user gesture if autoplay is blocked)
+      let on = true;
+      try{ on = (localStorage.getItem(BGM_KEY) !== "0"); }catch(e){}
+
+      function paint(){
+        btn.textContent = on ? "🎵 Music: On" : "🔇 Music: Off";
+        btn.classList.toggle("off", !on);
+      }
+
+      function applyPlayState(userInitiated){
+        paint();
+        if(!on){
+          try{ bgm.pause(); }catch(e){}
+          return;
+        }
+        bgm.volume = 0.22;
+        try{
+          const p = bgm.play();
+          if(p && p.catch) p.catch(()=>{ /* autoplay blocked */ });
+        }catch(e){}
+      }
+
+      function setOn(v, userInitiated){
+        on = !!v;
+        try{ localStorage.setItem(BGM_KEY, on ? "1" : "0"); }catch(e){}
+        applyPlayState(userInitiated);
+      }
+
+      // Click / keyboard
+      btn.addEventListener("click", ()=> setOn(!on, true));
+      btn.addEventListener("keydown", (e)=>{
+        if(e.key==="Enter" || e.key===" "){
+          e.preventDefault();
+          setOn(!on, true);
+        }
+      });
+
+      // If autoplay is blocked, first tap anywhere will start it (if ON)
+      window.addEventListener("pointerdown", ()=>{ applyPlayState(true); }, { once:true, passive:true });
+
+      // Sync across tabs/windows
+      window.addEventListener("storage", (e)=>{
+        if(e.key === BGM_KEY){
+          on = (e.newValue !== "0");
+          applyPlayState(false);
+        }
+      }, { passive:true });
+
+      applyPlayState(false);
+    })();
+
+    newQuestion();
+  </script>
+</body>
+</html>
